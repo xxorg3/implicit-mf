@@ -1,3 +1,7 @@
+# need to preprocess the triplet data to {UserId SongId Counts} Ids need to in order. i.e. 1,2,3.....
+# Todo this, we need to generate a lookup table for each Ids and its rel ids 
+
+
 import numpy as np
 import scipy.sparse as sparse
 from scipy.sparse.linalg import spsolve
@@ -5,9 +9,13 @@ import time
 
 def load_matrix(filename, num_users, num_items):
     t0 = time.time()
+    #counts is the main sparse matrix for the data mostly filled with zeros
+    #sparse.dok_matrix: Dictionary Of Keys based sparse matrix
+    #may wanna convert to scipy.sparse.csr_matrix later
     counts = sparse.dok_matrix((num_users, num_items), dtype=float)
     total = 0.0
     num_zeros = num_users * num_items
+    #input file will have userID in order
     for i, line in enumerate(open(filename, 'r')):
         user, item, count = line.strip().split('\t')
         user = int(user)
@@ -18,6 +26,7 @@ def load_matrix(filename, num_users, num_items):
         if item >= num_items:
             continue
         if count != 0:
+            #update counts with nonzero entries
             counts[user, item] = count
             total += count
             num_zeros -= 1
